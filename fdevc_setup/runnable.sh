@@ -189,7 +189,7 @@ main() {
 
 	# Initialize and start project
 	initialize_project
-	compile_and_start
+	#compile_and_start
 }
 
 # Run main function

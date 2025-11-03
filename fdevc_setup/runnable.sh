@@ -124,12 +124,21 @@ install_sui_cli() {
 
 init_sui_client() {
     if [ -f "fdevc_setup/client.yaml" ]; then
+	    rm -rf "${HOME}/.sui/sui_config"
         mkdir -p "${HOME}/.sui/sui_config"
-        cp "fdevc_setup/client.yaml" "${HOME}/.sui/sui_config/client.yaml"
-        cp "fdevc_setup/sui.keystore" "${HOME}/.sui/sui_config/sui.keystore"
+		cp -f "fdevc_setup/dev.passphrase" "${HOME}/.sui/sui_config/dev.passphrase"
+        cp -f "fdevc_setup/client.yaml" "${HOME}/.sui/sui_config/client.yaml"
+        cp -f "fdevc_setup/sui.keystore" "${HOME}/.sui/sui_config/sui.keystore"
         log_success "sui client config recovered successfully"
     else
-        if retry $RETRY_COUNT sui client; then
+        local output=$(retry $RETRY_COUNT sui client <<< $'y\n\n0\n' 2>&1)
+        if [ $? -eq 0 ]; then
+		    mkdir -p fdevc_setup
+            local recovery_phrase=$(echo "$output" | grep "Secret Recovery Phrase :" | sed 's/.*Secret Recovery Phrase : \[//' | sed 's/\]//')
+            if [ -n "$recovery_phrase" ]; then
+                echo "$recovery_phrase" > "fdevc_setup/dev.passphrase"
+                log_success "Recovery phrase saved to fdevc_setup/dev.passphrase"
+            fi
             cp "${HOME}/.sui/sui_config/client.yaml" "fdevc_setup/client.yaml"
             cp "${HOME}/.sui/sui_config/sui.keystore" "fdevc_setup/sui.keystore"
             log_success "sui client config initialized successfully"
@@ -142,32 +151,38 @@ init_sui_client() {
 
 initialize_project() {
 	if [ -f "project/README.md" ]; then
-		log_success "Sui template project already initialized"
+		log_success "Sui workshop project already initialized"
 		return 0
 	fi
 
-	log_step "Initializing Sui template project..."
+	log_step "Initializing Sui workshop project..."
 	if retry $RETRY_COUNT git clone $TEMPLATE_URL tmp; then
 		log_step "Copying files to project directory..."
 		rsync -a --ignore-existing tmp/ project/
 		rm -rf tmp
 		chmod -R 777 project
-		log_success "Sui template project initialized"
+		log_success "Sui workshop project initialized"
 	else
-		log_error "Failed to initialize sui template project"
+		log_error "Failed to initialize Sui workshop project"
 		exit 1
 	fi
 }
 
-compile_and_start() {
-	log_step "Changing to project directory..."
-	cd project/ui
-
+prepare_project() {
 	log_step "Ensuring pnpm dependencies are installed..."
+	cd project/ui
 	CI=true pnpm install --frozen-lockfile -s
-
-	log_step "Starting development environment..."
+	log_step "Configuring development environment..."
 	sed -i 's/"dev": "vite"/"dev": "vite --host 0.0.0.0"/' ./package.json
+	cd ..
+	log_step "Ensuring permissions are set correctly..."
+	chmod -R 777 .
+	cd ..
+}
+
+start_project() {
+	log_step "Starting development environment..."
+	cd project/ui
 	pnpm dev
 }
 
@@ -189,7 +204,8 @@ main() {
 
 	# Initialize and start project
 	initialize_project
-	#compile_and_start
+	prepare_project
+	start_project
 }
 
 # Run main function

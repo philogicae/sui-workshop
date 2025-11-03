@@ -7,7 +7,7 @@ PROJECT_DIR="${WORKSPACE_DIR}/project"
 mkdir -p "${PROJECT_DIR}"
 
 #################################### Configuration variables - modify these as needed ####################################
-CONTAINER_NAME="sui-template"
+CONTAINER_NAME="sui-workshop"
 DOCKER_CMD=""                           # Container runtime (default: docker)
 IMAGE=""                                # Docker image or Dockerfile path (overrides default image or ./fdevc.Dockerfile)
 SOCKET="true"                           # Mount Docker socket (true/false)
@@ -65,7 +65,7 @@ done
 CONTAINER_ARG=""
 if [ -n "$CONTAINER_NAME" ]; then
 	ACTUAL_NAME="$CONTAINER_NAME"
-	[ "$CONTAINER_NAME" = "sui-template" ] && ACTUAL_NAME="$(basename "$PWD")"
+	[ "$CONTAINER_NAME" = "sui-workshop" ] && ACTUAL_NAME="$(basename "$PWD")"
 	# Check if container exists
 	DOCKER_CHECK="${DOCKER_CMD:-${FDEVC_DOCKER:-docker}}"
 	read -ra DOCKER_PARTS <<<"$DOCKER_CHECK"

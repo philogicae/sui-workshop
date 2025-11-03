@@ -35,14 +35,12 @@ curl -fsSL https://raw.githubusercontent.com/philogicae/sui-workshop/main/instal
 
 ## Usage
 
-### Sui Client Configuration
+> Required: sui-workshop is running (quick install script or ran ./launch.sh directly)
 
-1. When prompted, type: `y` -> `Enter` -> `Enter` -> `0` -> `Enter`
+1. Import an existing config into `./fdevc_setup`, else a new one will be created (`client.yaml`, `sui.keystore`, `dev.passphrase`).
 
-> Your mnemonic phrase will only be visible once!
+2. Import your `dev passphrase` (`./fdevc_setup/dev.passphrase`) in `Slush` browser extension and claim [faucet](https://faucet.sui.io/?network=testnet).
 
-2. Then copy-paste your `mnemonic phrase` to `./fdevc_setup/dev.passphrase`
+3. Try out Sui template at [http://localhost:5173](http://localhost:5173) (or any other forwarded port you configured)
 
-3. Import it in `Slush` browser extension.
-
-Try out Sui workshop at [http://localhost:5173](http://localhost:5173) (or any other forwarded port you configured)
+4. Open `sui-workshop` in your IDE and start coding!
